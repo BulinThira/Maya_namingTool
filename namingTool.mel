@@ -1,0 +1,258 @@
+// namingTool.mel - MEL Script
+
+
+// DESCRIPTION: Tool for naming basic models (except joints with hierarchy)
+// REQUIRE: Nothing
+// AUTHORS: BulinThira - Github
+
+proc MyRenameTool(){
+if (`window -q -ex "MRT_window"`){
+deleteUI -window "MRT_window";
+}
+window -t "My Rename Tool " "MRT_window";
+
+columnLayout -adj true;
+
+//RENAME
+frameLayout - label "Rename";
+gridLayout - numberOfColumns 2 -cellWidth 150 -cellHeight 25;
+  text -label "\tName:  " "name_text";
+  textField -w 200 "name_textField";
+  text -label "\tPadding:  " "padding_text";
+  intField -w 200 -value 2 -min 1 -max 4 -step 1 "padding_textField";
+  text -label "    ";
+  optionMenu -label "Side" -cc doRename "optionside";
+    menuItem -label "--" "1";
+    menuItem -label "Left" "2";
+    menuItem -label "Right" "3";
+  text -label "\tSuffix:  " "suffix_nameframe_text";
+  textField -w 200 "suffix_nameframe_textField";
+  setParent ..;
+
+button -label "Rename" -h 30 -c doRename "rename button";
+
+
+//SEARCH AND REPLACE
+frameLayout - label "Search and Replace";
+gridLayout - numberOfColumns 2 -cellWidth 150 -cellHeight 25;
+  text -label "\tSearch:  " "search_text";
+  textField -w 200 "search_textField";
+  text -label "\tReplace:  " "replace_text";
+  textField -w 200 "replace_textField";
+  setParent ..; 
+  
+button -label "Replace" -h 30 -c doReplace "replace button";
+
+//QUICK REPLACE
+frameLayout - label "Quick Replace" -bgc 0.1 0.5 0.5;
+gridLayout - numberOfColumns 2 -cellWidth 170 -cellHeight 25;
+ button -label "L -> R" -h 30 -c doLR "LtoR button";
+ button -label "R -> L" -h 30 -c doRL"RtoL button";
+  setParent ..; 
+
+// ADD QUICK PREFIX AND SUFFIX
+frameLayout - label "Quick Prefix and Suffix" -bgc 0.1 0.5 0.5;
+gridLayout - numberOfColumns 5 -cellWidth 70 -cellHeight 25;
+ text -label "\tPrefix:  " "quickpre_text";
+ button -label "L" -h 30 -c doQuickL "quickL button";
+ button -label "R" -h 30 -c doQuickR "quickR button";
+ button -label "C" -h 30 -c doQuickC "quickC button";
+ setParent ..;
+ 
+ gridLayout - numberOfColumns 5 -cellWidth 70 -cellHeight 25;
+ text -label "\tSuffix:  " "quickpre_text";
+ button -label "geo" -h 30 -c doQuickGEO "quickGEO button";
+ button -label "grp" -h 30 -c doQuickGRP "quickGRP button";
+ button -label "jnt" -h 30 -c doQuickJNT "quickJNT button";
+ button -label "ctrl" -h 30 -c doQuickCTRL "quickCTRL button";
+ 
+ setParent ..;
+
+// ADD PREFIX AND SUFFIX
+frameLayout - label "Add Prefix and Suffix";
+gridLayout - numberOfColumns 2 -cellWidth 150 -cellHeight 25;
+  text -label "\tPrefix:  " "pre_text";
+  textField -w 200 "pre_textField";
+  text -label "\tSuffix:  " "suf_text";
+  textField -w 200 "suf_textField";
+  setParent ..;
+
+button -label "Add" -h 30 -c doAddPreSuf "addpresuf button";
+  
+
+
+
+
+
+
+
+
+showWindow "MRT_window";
+window -e -wh 350 400 "MRT_window";
+}
+
+
+proc doRename(){
+    $name = `textField -q -tx "name_textField"`;
+    $padding = `intField -q -value "padding_textField"`;
+    $side = `optionMenu -q -sl "optionside"`;
+    $suffix_nameframe = "_" + `textField -q -tx "suffix_nameframe_textField"`;
+    $sidename = "";
+    $sn_dR = "";
+    
+    
+        if($side == "1") {$sidename = "";}
+        else if($side == "2") {$sidename = "_Left";}
+        else if($side == "3") {$sidename = "_Right";}
+        
+        if($suffix_nameframe == "_") {$sn_dR = "";}
+        else if($suffix_nameframe != "_") {$sn_dR = $suffix_nameframe;}
+        
+    $sels_1 = `ls -sl`;
+    for($i=0; $i<size($sels_1); $i++){
+        
+        
+        if($padding == 1){
+            $newname = $name + "_" + paddingProc(1,$i+1) + $sidename + $sn_dR;
+            rename $sels_1[$i] $newname;
+        }
+        else if($padding == 2){
+            $newname = $name + "_" + paddingProc(2,$i+1) + $sidename + $sn_dR;
+            rename $sels_1[$i] $newname;
+        }
+        else if($padding == 3){
+            $newname = $name + "_" + paddingProc(3,$i+1) + $sidename + $sn_dR;
+            rename $sels_1[$i] $newname;
+        }
+        else if($padding == 4){
+            $newname = $name + "_" + paddingProc(4,$i+1) + $sidename + $sn_dR;
+            rename $sels_1[$i] $newname;
+        }
+    }
+    
+}
+
+proc string paddingProc(int $padnum, int $num){
+    $result = "";
+    $prefix = "";
+    
+    $strnum = string($num);
+    $numsize = size($strnum);
+    
+    $padstop = $padnum - $numsize;
+    for($i=0; $i<$padstop; $i++){
+        $prefix += "0";
+    }
+    
+    $result = $prefix + $num;
+    return $result;
+}
+
+
+proc doReplace(){
+    $search = `textField -q -tx "search_textField"`;
+    $replace = `textField -q -tx "replace_textField"`;
+    $sels_3 = `ls -sl`;
+    for($sel in $sels_3){
+        $newname = `substitute ($search + "") ($sel+"") ($replace+"")`;
+        rename $sel $newname;
+        }
+}
+
+proc doLR(){
+    $sels_LR = `ls -sl`;
+    for($sel in $sels_LR){
+        $newname = `substitute ("L") ($sel+"") ("R")`;
+        rename $sel $newname;
+        }
+}
+
+proc doRL(){
+    $sels_LR = `ls -sl`;
+    for($sel in $sels_LR){
+        $newname = `substitute ("R") ($sel+"") ("L")`;
+        rename $sel $newname;
+        }
+}
+
+proc doQuickL(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_L = "L" + "_" + $each;
+        rename $each $newname_L;
+    }
+}
+
+proc doQuickR(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_R = "R" + "_" + $each;
+        rename $each $newname_R;
+    }
+}
+
+proc doQuickC(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_C = "C" + "_" + $each;
+        rename $each $newname_C;
+    }
+}
+
+proc doQuickGEO(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_GEO = $each + "_" + "geo";
+        rename $each $newname_GEO;
+    }
+}
+
+proc doQuickGRP(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_GRP = $each + "_" + "grp";
+        rename $each $newname_GRP;
+    }
+}
+
+proc doQuickJNT(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_JNT = $each + "_" + "jnt";
+        rename $each $newname_JNT;
+    }
+}
+
+proc doQuickCTRL(){
+    $sels_QPS = `ls -sl`;
+    for($each in $sels_QPS){
+        $newname_CTRL = $each + "_" + "ctrl";
+        rename $each $newname_CTRL;
+    }
+}
+
+proc doAddPreSuf(){
+    $addpre = `textField -q -tx "pre_textField"`;
+    $addsuf = `textField -q -tx "suf_textField"`;
+    $sels_2 = `ls -sl`;
+    for($each in $sels_2){
+        if($addpre == ""){
+            $newname_2 = $each + "_" + $addsuf;
+            rename $each $newname_2;
+        }
+        else if($addsuf == ""){
+            $newname_2 = $addpre + "_" + $each;
+            rename $each $newname_2;
+        }
+        else{
+            $newname_2 = $addpre + "_" + $each + "_" + $addsuf;
+            rename $each $newname_2;
+        }
+        
+     }
+    
+
+}
+
+
+MyRenameTool;
