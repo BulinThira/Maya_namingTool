@@ -1,4 +1,4 @@
-# NamingTool.py - Python Script
+# namingTool.py - Python Script
 
 # DESCRIPTION: Tool for naming basic models (except joints with hierarchy)
 # REQUIRE: Python3
