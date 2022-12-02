@@ -2,7 +2,7 @@
 
 # DESCRIPTION: Tool for naming basic models (except joints with hierarchy)
 # REQUIRE: Python3
-# AUTHOR: BulinThira - Github
+# AUTHOR: BulinThira - GitHub
 
 import maya.cmds as mc
 
