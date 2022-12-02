@@ -3,7 +3,7 @@
 
 // DESCRIPTION: Tool for naming basic models (except joints with hierarchy)
 // REQUIRE: Nothing
-// AUTHORS: BulinThira - Github
+// AUTHORS: BulinThira - GitHub
 
 proc MyRenameTool(){
 if (`window -q -ex "MRT_window"`){
